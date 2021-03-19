@@ -1,0 +1,3 @@
+('C02003_003E', 'race_white', 'Estimate!!Total!!Population of one race!!White')
+('C02003_004E', 'race_black', 'Estimate!!Total!!Population of one race!!Black or African American')
+('C02003_006E', 'race_asian', 'Estimate!!Total!!Population of one race!!Asian alone')

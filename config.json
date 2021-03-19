@@ -1,0 +1,561 @@
+{
+    "secrets_file": "secrets.yaml",
+    "state_name": "Illinois",
+    "model_type": "RFClassifier",
+    "model_info": {
+        "Baseline": {},
+        "BinaryLabelNNClassifier": {
+            "num_hidden_nodes_in_layers": [25, 6],
+            "activation": "relu"
+        },
+        "MultiLabelNNClassifier": {
+            "num_hidden_nodes_in_layers": [6, 4],
+            "activation": "relu"
+        },
+        "SVMClassifier": {
+            "class_weight": "balanced"
+        },
+        "RFClassifier": {
+            "n_estimators": 1000,
+            "max_depth": 1000,
+            "n_jobs": 10
+        },
+        "DTClassifier": {
+            "criterion": "entropy",
+            "class_weight": "balanced"
+        },
+        "LogRegClassifier": {}
+    },
+    "query": {
+        "name": ["map_bill_to_state_query", "bill_date_difference", "bill_final_query_processed_text"],
+        "train": {
+            "start_year": 2009,
+            "end_year": 2019,
+            "state_id": 13
+        },
+        "test": {
+            "start_year": 2020,
+            "end_year": 2020,
+            "state_id": 13
+        },
+        "schema_name": ["sketch", "sketch", "sketch"],
+        "table_name": ["am_bill_state", "am_date_diff", "am_basic_features_data"]
+    },
+    "transform": {
+        "ops": {
+            "bill_id": [],
+            "party_id": [],
+            "introduced_date": [],
+            "start_date": ["rename::session_start_date"],
+            "end_date": ["rename::session_end_date"],
+            "introduced_body": [],
+            "bill_description": [],
+            "bill_text": [],
+            "diff": [],
+            "status_new": [],
+            "sponsors": [],
+            "sponsor_count": ["retype::int64"],
+            "rep_sponsor_count": ["retype::int64"],
+            "sen_sponsor_count": ["retype::int64"],
+            "dem_senate_perc": ["retype::float64"],
+            "rep_senate_perc": ["retype::float64"],
+            "dem_house_perc": ["retype::float64"],
+            "rep_house_perc": ["retype::float64"],
+            "population": ["retype::int64"],
+            "median_age": ["retype::float64"],
+            "median_income": ["retype::int64"],
+            "female_ratio": ["retype::float64"],
+            "black_ratio": ["retype::float64"],
+            "asian_ratio": ["retype::float64"],
+            "white_ratio": ["retype::float64"],
+            "high_education": ["retype::float64"],
+            "unemployment": ["retype::float64"],
+            "poverty": ["retype::float64"]
+        },
+        "schema_name": "sketch",
+        "table_name": "am_basic_features_transformed",
+        "year_col": "introduced_date"
+    },
+    "split": {
+        "update_freq": 2,
+        "num_temporal_blocks": 4,
+        "split_list": [2,1,1,1],
+        "split_type": 1
+    },
+    "feature_type": "no_text",
+    "feature_info": {
+        "description_only": {
+            "feature_ops": {
+                "bill_description": {
+                    "tfidf": []
+                }                                   
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "text_only": {
+            "feature_ops": {
+                "bill_text": {
+                    "tfidf": []
+                }                                   
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "description_text": {
+            "feature_ops": {
+                "bill_description": {
+                    "tfidf": []
+                },
+                "bill_text": {
+                    "tfidf": []
+                }
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "no_text": {
+            "feature_ops": {
+                "party_id": {
+                    "impute_fixed": 0,
+                    "one_hot": 3
+                },
+                "introduced_body": {
+                    "impute_fixed": "H",
+                    "one_hot": ["H", "S"]
+                },
+                "introduced_date": {
+                    "time_since_session_start": ["session_start_date"],
+                    "impute_median": [],
+                    "normalize": []
+                },
+                "introduced_date::2": {
+                    "time_till_session_end": ["session_end_date"],
+                    "impute_median": [],
+                    "normalize": []
+                },
+                "sponsors": {
+                    "sponsor_pass_rate": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "sponsors::2": {
+                    "sponsor_total_bills": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "dem_senate_perc": {
+                    "impute_mean": []
+                },
+                "rep_senate_perc": {
+                    "impute_mean": []
+                },
+                "dem_house_perc": {
+                    "impute_mean": []
+                },
+                "rep_house_perc": {
+                    "impute_mean": []
+                },
+                "sponsor_count":{
+                    "impute_mean": []
+                },
+                "rep_sponsor_count":{
+                    "impute_mean": []
+                },
+                "sen_sponsor_count":{
+                    "impute_mean": []
+                },
+                "population":{
+                    "impute_mean": []
+                },
+                "median_age":{
+                    "impute_mean": []
+                },
+                "median_income":{
+                    "impute_mean": []
+                },
+                "female_ratio":{
+                    "impute_mean": []
+                },
+                "black_ratio":{
+                    "impute_mean": []
+                },
+                "asian_ratio":{
+                    "impute_mean": []
+                },
+                "white_ratio":{
+                    "impute_mean": []
+                },
+                "high_education":{
+                    "impute_mean": []
+                },
+                "unemployment":{
+                    "impute_mean": []
+                },
+                "poverty":{
+                    "impute_mean": []
+                }   
+            },
+            "feature_names": {
+                "party_id": ["party_id_0", "party_id_1", "party_id_2"],
+                "introduced_body": ["introduced_body_H", "introduced_body_S"],
+                "introduced_date": "time_since_session_start",
+                "introduced_date::2": "time_till_session_end",
+                "sponsors": "sponsor_pass_rate",
+                "sponsors::2": "sponsor_total_bills"
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "hybrid_description": {
+            "feature_ops": {
+                "party_id": {
+                    "impute_fixed": 0,
+                    "one_hot": 3
+                },
+                "introduced_body": {
+                    "impute_fixed": "H",
+                    "one_hot": ["H", "S"]
+                },
+                "introduced_date": {
+                    "time_since_session_start": ["session_start_date"],
+                    "impute_mean": []
+                },
+                "introduced_date::2": {
+                    "time_till_session_end": ["session_end_date"],
+                    "impute_mean": []
+                },
+                "sponsors": {
+                    "sponsor_pass_rate": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "sponsors::2": {
+                    "sponsor_total_bills": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "bill_description": {
+                    "tfidf": []
+                },
+                "dem_senate_perc": {
+                    "impute_mean": []
+                },
+                "rep_senate_perc": {
+                    "impute_mean": []
+                },
+                "dem_house_perc": {
+                    "impute_mean": []
+                },
+                "rep_house_perc": {
+                    "impute_mean": []
+                },
+                "sponsor_count":{
+                    "impute_mean": []
+                },
+                "rep_sponsor_count":{
+                    "impute_mean": []
+                },
+                "sen_sponsor_count":{
+                    "impute_mean": []
+                },
+                "population":{
+                    "impute_mean": []
+                },
+                "median_age":{
+                    "impute_mean": []
+                },
+                "median_income":{
+                    "impute_mean": []
+                },
+                "female_ratio":{
+                    "impute_mean": []
+                },
+                "black_ratio":{
+                    "impute_mean": []
+                },
+                "asian_ratio":{
+                    "impute_mean": []
+                },
+                "white_ratio":{
+                    "impute_mean": []
+                },
+                "high_education":{
+                    "impute_mean": []
+                },
+                "unemployment":{
+                    "impute_mean": []
+                },
+                "poverty":{
+                    "impute_mean": []
+                }                                   
+            },
+            "feature_names": {
+                "party_id": ["party_id_0", "party_id_1", "party_id_2"],
+                "introduced_house": ["introduced_house_H", "introduced_house_S"],
+                "introduced_date": "time_since_session_start",
+                "introduced_date::2": "time_till_session_end",
+                "sponsors": "sponsor_pass_rate",
+                "sponsors::2": "sponsor_total_bills"
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "hybrid_text": {
+            "feature_ops": {
+                "party_id": {
+                    "impute_fixed": 0,
+                    "one_hot": 3
+                },
+                "introduced_body": {
+                    "impute_fixed": "H",
+                    "one_hot": ["H", "S"]
+                },
+                "introduced_date": {
+                    "time_since_session_start": ["session_start_date"],
+                    "impute_mean": []
+                },
+                "introduced_date::2": {
+                    "time_till_session_end": ["session_end_date"],
+                    "impute_mean": []
+                },
+                "sponsors": {
+                    "sponsor_pass_rate": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "sponsors::2": {
+                    "sponsor_total_bills": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "bill_text": {
+                    "tfidf": []
+                },
+                "dem_senate_perc": {
+                    "impute_mean": []
+                },
+                "rep_senate_perc": {
+                    "impute_mean": []
+                },
+                "dem_house_perc": {
+                    "impute_mean": []
+                },
+                "rep_house_perc": {
+                    "impute_mean": []
+                },
+                "sponsor_count":{
+                    "impute_mean": []
+                },
+                "rep_sponsor_count":{
+                    "impute_mean": []
+                },
+                "sen_sponsor_count":{
+                    "impute_mean": []
+                },
+                "population":{
+                    "impute_mean": []
+                },
+                "median_age":{
+                    "impute_mean": []
+                },
+                "median_income":{
+                    "impute_mean": []
+                },
+                "female_ratio":{
+                    "impute_mean": []
+                },
+                "black_ratio":{
+                    "impute_mean": []
+                },
+                "asian_ratio":{
+                    "impute_mean": []
+                },
+                "white_ratio":{
+                    "impute_mean": []
+                },
+                "high_education":{
+                    "impute_mean": []
+                },
+                "unemployment":{
+                    "impute_mean": []
+                },
+                "poverty":{
+                    "impute_mean": []
+                }                                   
+            },
+            "feature_names": {
+                "party_id": ["party_id_0", "party_id_1", "party_id_2"],
+                "introduced_house": ["introduced_house_H", "introduced_house_S"],
+                "introduced_date": "time_since_session_start",
+                "introduced_date::2": "time_till_session_end",
+                "sponsors": "sponsor_pass_rate",
+                "sponsors::2": "sponsor_total_bills"
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "all": {
+            "feature_ops": {
+                "party_id": {
+                    "impute_fixed": 0,
+                    "one_hot": 3
+                },
+                "introduced_body": {
+                    "impute_fixed": "H",
+                    "one_hot": ["H", "S"]
+                },
+                "introduced_date": {
+                    "time_since_session_start": ["session_start_date"],
+                    "impute_mean": []
+                },
+                "introduced_date::2": {
+                    "time_till_session_end": ["session_end_date"],
+                    "impute_mean": []
+                },
+                "sponsors": {
+                    "sponsor_pass_rate": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "sponsors::2": {
+                    "sponsor_total_bills": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                },
+                "bill_description": {
+                    "tfidf": []
+                },
+                "bill_text": {
+                    "tfidf": []
+                },"dem_senate_perc": {
+                    "impute_mean": []
+                },
+                "rep_senate_perc": {
+                    "impute_mean": []
+                },
+                "dem_house_perc": {
+                    "impute_mean": []
+                },
+                "rep_house_perc": {
+                    "impute_mean": []
+                },
+                "sponsor_count":{
+                    "impute_mean": []
+                },
+                "rep_sponsor_count":{
+                    "impute_mean": []
+                },
+                "sen_sponsor_count":{
+                    "impute_mean": []
+                },
+                "population":{
+                    "impute_mean": []
+                },
+                "median_age":{
+                    "impute_mean": []
+                },
+                "median_income":{
+                    "impute_mean": []
+                },
+                "female_ratio":{
+                    "impute_mean": []
+                },
+                "black_ratio":{
+                    "impute_mean": []
+                },
+                "asian_ratio":{
+                    "impute_mean": []
+                },
+                "white_ratio":{
+                    "impute_mean": []
+                },
+                "high_education":{
+                    "impute_mean": []
+                },
+                "unemployment":{
+                    "impute_mean": []
+                },
+                "poverty":{
+                    "impute_mean": []
+                }                                      
+            },
+            "feature_names": {
+                "party_id": ["party_id_0", "party_id_1", "party_id_2"],
+                "introduced_house": ["introduced_house_H", "introduced_house_S"],
+                "introduced_date": "time_since_session_start",
+                "introduced_date::2": "time_till_session_end",
+                "sponsors": "sponsor_pass_rate",
+                "sponsors::2": "sponsor_total_bills"
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "dummy": {            
+            "feature_ops": {
+                "party_id": {
+                    "impute_fixed": 0,
+                    "one_hot": 3
+                },
+                "introduced_body": {
+                    "impute_fixed": "H",
+                    "one_hot": ["H", "S"]
+                },
+                "sponsors": {
+                    "sponsor_pass_rate": ["introduced_date", "status_new"],
+                    "impute_mean": []
+                }
+            },
+            "feature_names": {
+                "party_id": ["party_id_0", "party_id_1", "party_id_2"],
+                "introduced_body": ["introduced_body_H", "introduced_body_S"]
+            },
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        },
+        "baseline": {
+            "feature_ops":{
+                "bill_id": {}
+            },
+            "feature_names": {},
+            "index_col_name": "bill_id",
+            "label_col_name": "status_new"
+        }
+    },
+    "label_type": "binary",
+    "label_info": {
+        "binary": {
+            "size": 2
+        },
+        "binary_01": {
+            "size": 1
+        },
+        "ternary": {
+            "size": 3
+        }
+    },
+    "train_params": {
+        "batch_size": 1024,
+        "learning_rate": 1e-5,
+        "optimizer": "Adam",
+        "epochs": 50,
+        "loss": "categorical_crossentropy",
+        "return_iterator": false,
+        "verbose": false
+    },
+    "model_path": "model_folder",
+    "predict_params": {
+        "batch_size": 256,
+        "verbose": 1
+    },
+    "evaluate_params": {
+        "metrics": ["precision", "recall"],
+        "top_k_fraction": 0.3,
+        "threshold": 0.5,
+        "cross_tabs":{
+            "use": false,
+            "feature_indices": []
+        },
+        "feature_importances":{
+            "use": false,
+            "top_n": 20
+        },
+        "bias_analysis":{
+            "use": true,
+            "metrics": ["FDR", "TPR"],
+            "groups": ["white", "black", "asian"]
+        }
+    }
+}
